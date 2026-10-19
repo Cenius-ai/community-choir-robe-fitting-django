@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Alteration queue · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <h1 class="page-title">Alteration queue</h1>
+      <span class="page-meta">{{ total_tickets }} ticket{{ total_tickets|pluralize }}</span>
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--primary" href="#new-ticket">New ticket</a>
+    </div>
+    <div class="tabs" role="group" aria-label="Filter tickets by status">
+      {% for key, label, count in tabs %}
+      <a class="tab" href="{% if key == 'all' %}{% url 'alteration-list' %}{% else %}{% url 'alteration-list' %}?status={{ key }}{% endif %}"{% if active_tab == key %} aria-current="page"{% endif %}>{{ label }} <span class="tab__count">{{ count }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    {% if tickets %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Singer</th>
+            <th scope="col">Size</th>
+            <th scope="col">Requested</th>
+            <th scope="col">Seamstress notes</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="visually-hidden">Open</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket in tickets %}
+          <tr>
+            <td><a class="row-link" href="{% url 'alteration-detail' ticket.id %}">{{ ticket.singer.full_name }}</a></td>
+            <td>
+              {% if ticket.singer.robe_size %}
+              <span class="chip chip--size">{{ ticket.singer.robe_size.code }}</span>
+              {% else %}
+              <span class="chip chip--empty">Unassigned</span>
+              {% endif %}
+            </td>
+            <td class="num">{{ ticket.requested_at|date:"j M Y" }}{% if ticket.is_overdue %}<br><span class="chip chip--empty">Overdue</span>{% endif %}</td>
+            <td class="cell-note">{% if ticket.notes_excerpt %}{{ ticket.notes_excerpt }}{% else %}<span class="chip chip--empty">No notes yet</span>{% endif %}</td>
+            <td>{% include "partials/_status_badge.html" with status=ticket.status %}</td>
+            <td class="num"><a class="link-quiet" href="{% url 'alteration-detail' ticket.id %}">Open</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif total_tickets %}
+    <div class="empty">
+      <p class="empty__title">No tickets with that status</p>
+      <p class="empty__text">The queue has {{ total_tickets }} ticket{{ total_tickets|pluralize }} in other statuses.</p>
+      <a class="btn btn--ghost" href="{% url 'alteration-list' %}">Show all tickets</a>
+    </div>
+    {% else %}
+    <div class="empty">
+      <p class="empty__title">The alteration queue is empty — flag a singer as needing alteration or create a ticket here</p>
+      <p class="empty__text">Tickets move Queued → In progress → Done, and the completion date is stamped automatically.</p>
+      <a class="btn btn--primary" href="#new-ticket">Create a ticket</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="split__aside">
+    <div class="card" id="new-ticket">
+      <div class="card__head">
+        <h2 class="section-title">New ticket</h2>
+      </div>
+      <form method="post" action="{% url 'alteration-list' %}" class="form-stack">
+        {% csrf_token %}
+        <div class="field">
+          <label class="field__label" for="{{ form.singer.id_for_label }}">Singer</label>
+          {{ form.singer }}
+          {% include "partials/_field_errors.html" with field=form.singer %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.seamstress_notes.id_for_label }}">Seamstress notes</label>
+          {{ form.seamstress_notes }}
+          {% include "partials/_field_errors.html" with field=form.seamstress_notes %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.due_date.id_for_label }}">Due date <span class="field__hint">(optional)</span></label>
+          {{ form.due_date }}
+          {% include "partials/_field_errors.html" with field=form.due_date %}
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Queue ticket</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

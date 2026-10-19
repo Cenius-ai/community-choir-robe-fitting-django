@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ venue.name }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'venue-detail' venue.id %}">← {{ venue.name }}</a>
+      <h1 class="page-title">Delete venue</h1>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="delete-venue-title">
+    <p class="error-code">Confirm deletion</p>
+    <h2 class="error-title" id="delete-venue-title">Remove {{ venue.name }} from the venue list?</h2>
+    <p class="empty__text">Its dress code will be deleted as well. This cannot be undone.</p>
+    <form method="post" action="{% url 'venue-delete' venue.id %}" class="form-actions">
+      {% csrf_token %}
+      <input type="hidden" name="confirm" value="yes">
+      <button type="submit" class="btn btn--danger">Yes, delete {{ venue.name }}</button>
+      <a class="btn btn--ghost" href="{% url 'venue-detail' venue.id %}">Keep venue</a>
+    </form>
+  </section>
+</div>
+{% endblock %}

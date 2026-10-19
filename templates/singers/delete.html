@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ singer.full_name }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'singer-detail' singer.id %}">← {{ singer.full_name }}</a>
+      <h1 class="page-title">Delete singer</h1>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="delete-title">
+    <p class="error-code">Confirm deletion</p>
+    <h2 class="error-title" id="delete-title">Remove {{ singer.full_name }} from the roster?</h2>
+    <p class="empty__text">
+      This deletes the singer and {% if alteration_count %}{{ alteration_count }} alteration ticket{{ alteration_count|pluralize }}{% else %}their fitting record{% endif %} permanently.
+      It cannot be undone.
+    </p>
+    <form method="post" action="{% url 'singer-delete' singer.id %}" class="form-actions">
+      {% csrf_token %}
+      <input type="hidden" name="confirm" value="yes">
+      <button type="submit" class="btn btn--danger">Yes, delete {{ singer.full_name }}</button>
+      <a class="btn btn--ghost" href="{% url 'singer-detail' singer.id %}">Keep singer</a>
+    </form>
+  </section>
+</div>
+{% endblock %}

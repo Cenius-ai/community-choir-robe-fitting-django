@@ -1,0 +1,68 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ product_name }}{% endblock %}</title>
+  <meta name="description" content="Robe sizes per singer, an alteration queue with seamstress notes, and concert dress codes by venue.">
+  <meta name="theme-color" content="#f8fcf5">
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body class="{% block body_class %}app-body{% endblock %}">
+  <div class="scroll-thread" aria-hidden="true"><span class="scroll-thread__fill" data-scroll-thread></span></div>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="{% url 'home' %}" aria-label="Community Choir Robe Fitting — home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3h6l3 4-2.5 2.5V21h-7V9.5L6 7z"></path>
+            <path d="M12 3v6"></path>
+          </svg>
+        </span>
+        <span class="brand__name">Community Choir <span>Robe Fitting</span></span>
+      </a>
+
+      {% if signed_in %}
+      <nav class="nav" aria-label="Primary">
+        <ul class="nav__list">
+          {% for item in nav_items %}
+          <li>
+            <a class="nav__link" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <div class="account">
+        <span class="account__name">{{ account_name }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--ghost btn--sm">Sign out</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="account">
+        <span class="account__name">Choir fittings</span>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  {% block filterbar %}{% endblock %}
+
+  <main id="main" class="{% block main_class %}app-canvas{% endblock %}" tabindex="-1">
+    {% block messages %}{% include "partials/_messages.html" %}{% endblock %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="app-footer">
+    <div class="app-footer__inner">
+      <span>{{ product_name }} · robe sizes, alterations and dress codes</span>
+      <span>Server-rendered with Django · SQLite</span>
+    </div>
+  </footer>
+</body>
+</html>

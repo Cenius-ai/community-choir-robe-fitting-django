@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My robe · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <p class="eyebrow">Singer</p>
+      <h1 class="page-title">My robe</h1>
+      {% if singer %}<span class="page-meta">{{ singer.get_voice_part_display }}</span>{% endif %}
+    </div>
+    <div class="filterbar__actions">
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--ghost">Sign out</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    {% if not singer %}
+    <div class="empty">
+      <p class="empty__title">Your account isn't linked to a singer record yet</p>
+      <p class="empty__text">Ask your choir director to link your account to your roster entry. Once they do, your robe size and alteration status appear here.</p>
+    </div>
+    {% else %}
+    <section class="card" aria-labelledby="my-fitting">
+      <div class="card__head">
+        <h2 class="section-title" id="my-fitting">{{ singer.full_name }}</h2>
+        <span class="chip">{{ singer.get_voice_part_display }}</span>
+      </div>
+      {% if singer.robe_size %}
+      <div class="size-hero">
+        <span class="size-hero__code">{{ singer.robe_size.code }}</span>
+        <span class="size-hero__meta">Chest {{ singer.robe_size.chest_range }} in · Length {{ singer.robe_size.length_inches }} in</span>
+      </div>
+      <p class="card__sub">This is the robe size your director assigned after your fitting.</p>
+      {% else %}
+      <div class="empty empty--inline">
+        <p class="empty__title">No robe size assigned yet — your director will assign one; check back after your fitting</p>
+        <p class="empty__text">Once your size is on the roster it shows up here with its chest range and length.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card" aria-labelledby="my-alteration">
+      <div class="card__head">
+        <h2 class="section-title" id="my-alteration">Alteration status</h2>
+      </div>
+      {% if current_alteration %}
+      <div class="detail-head">
+        {% include "partials/_status_badge.html" with status=current_alteration.status %}
+        <span class="card__sub">Requested {{ current_alteration.requested_at|date:"j M Y" }}{% if current_alteration.due_date %} · due {{ current_alteration.due_date|date:"j M Y" }}{% endif %}</span>
+      </div>
+      <p class="card__sub">Your director and the seamstress manage the work; there is nothing to fill in here.</p>
+      {% else %}
+      <p class="card__sub">No alteration ticket open right now — your robe needs no changes.</p>
+      {% endif %}
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="split__aside">
+    <section class="card" aria-labelledby="my-help">
+      <div class="card__head"><h2 class="section-title" id="my-help">Need a change?</h2></div>
+      <p class="card__sub">Speak to the choir director after rehearsal. They raise the alteration ticket and the seamstress picks it up from the queue.</p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

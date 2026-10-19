@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Alteration · {{ ticket.singer.full_name }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'alteration-list' %}">← Queue</a>
+      <h1 class="page-title">{{ ticket.singer.full_name }}</h1>
+      {% include "partials/_status_badge.html" with status=ticket.status %}
+      {% if ticket.singer.robe_size %}
+      <span class="chip chip--size">Size {{ ticket.singer.robe_size.code }}</span>
+      {% else %}
+      <span class="chip chip--empty">Unassigned</span>
+      {% endif %}
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--ghost" href="{% url 'singer-detail' ticket.singer.id %}">Singer page</a>
+      <a class="btn btn--danger" href="{% url 'alteration-delete' ticket.id %}">Delete ticket</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <form method="post" action="{% url 'alteration-detail' ticket.id %}" class="card form-stack">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save">
+    <div class="card__head">
+      <h2 class="section-title">Seamstress notes</h2>
+      <span class="card__sub">Saved to the database — they survive a reload.</span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="{{ form.seamstress_notes.id_for_label }}">What needs doing</label>
+      {{ form.seamstress_notes }}
+      {% include "partials/_field_errors.html" with field=form.seamstress_notes %}
+      {% if not ticket.seamstress_notes %}
+      <p class="field__hint">No notes yet — record pinning, hem, or sleeve changes here.</p>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="{{ form.due_date.id_for_label }}">Due date <span class="field__hint">(optional)</span></label>
+      {{ form.due_date }}
+      {% include "partials/_field_errors.html" with field=form.due_date %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary">Save notes</button>
+    </div>
+  </form>
+
+  <aside class="split__aside">
+    <section class="card" aria-labelledby="status-title">
+      <div class="card__head">
+        <h2 class="section-title" id="status-title">Workflow status</h2>
+      </div>
+      <form method="post" action="{% url 'alteration-detail' ticket.id %}" class="status-actions">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="status">
+        {% for value, label in statuses %}
+        <button type="submit" name="status" value="{{ value }}" class="btn {% if ticket.status == value %}btn--primary{% else %}btn--ghost{% endif %}"{% if ticket.status == value %} aria-pressed="true"{% endif %}>{{ label }}</button>
+        {% endfor %}
+      </form>
+      <p class="form-note">
+        {% if ticket.is_done and ticket.completed_at %}Completed {{ ticket.completed_at|date:"j M Y, H:i" }}.{% else %}Setting Done stamps the completion date and drops the ticket out of the Queued filter.{% endif %}
+      </p>
+    </section>
+
+    <section class="card" aria-labelledby="ticket-meta">
+      <div class="card__head"><h2 class="section-title" id="ticket-meta">Ticket</h2></div>
+      <dl class="definition">
+        <dt>Singer</dt>
+        <dd><a href="{% url 'singer-detail' ticket.singer.id %}">{{ ticket.singer.full_name }}</a></dd>
+        <dt>Voice part</dt>
+        <dd>{{ ticket.singer.get_voice_part_display }}</dd>
+        <dt>Robe size</dt>
+        <dd>{% if ticket.singer.robe_size %}{{ ticket.singer.robe_size.code }} — chest {{ ticket.singer.robe_size.chest_range }} in, length {{ ticket.singer.robe_size.length_inches }} in{% else %}Unassigned{% endif %}</dd>
+        <dt>Requested</dt>
+        <dd>{{ ticket.requested_at|date:"j M Y" }}</dd>
+        <dt>Due</dt>
+        <dd>{% if ticket.due_date %}{{ ticket.due_date|date:"j M Y" }}{% if ticket.is_overdue %} <span class="chip chip--empty">Overdue</span>{% endif %}{% else %}No due date{% endif %}</dd>
+        <dt>Completed</dt>
+        <dd>{% if ticket.completed_at %}{{ ticket.completed_at|date:"j M Y, H:i" }}{% else %}—{% endif %}</dd>
+      </dl>
+    </section>
+  </aside>
+</div>
+{% endblock %}

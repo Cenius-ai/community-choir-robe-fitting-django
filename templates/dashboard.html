@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Fitting overview · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <p class="eyebrow">Director</p>
+      <h1 class="page-title">Fitting overview</h1>
+      <span class="page-meta">{{ singer_count }} singer{{ singer_count|pluralize }} · {{ venue_count }} venue{{ venue_count|pluralize }}</span>
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--ghost" href="{% url 'alteration-list' %}">Alteration queue</a>
+      <a class="btn btn--primary" href="{% url 'singer-list' %}">Manage roster</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="bento">
+  <section class="bento__cell bento__cell--anchor" aria-labelledby="attention-title">
+    <p class="bento__label">Needs attention</p>
+    <h2 class="section-title" id="attention-title">Open alterations</h2>
+    {% if attention %}
+    <ul class="bento__list">
+      {% for ticket in attention %}
+      <li>
+        <a class="bento__item" href="{% url 'alteration-detail' ticket.id %}">
+          <span class="bento__item-name">{{ ticket.singer.full_name }}</span>
+          <span class="bento__item-meta">
+            {% if ticket.singer.robe_size %}Size {{ ticket.singer.robe_size.code }}{% else %}Unassigned{% endif %}
+            · {% if ticket.due_date %}due {{ ticket.due_date|date:"j M" }}{% if ticket.is_overdue %} (overdue){% endif %}{% else %}no due date{% endif %}
+          </span>
+          {% include "partials/_status_badge.html" with status=ticket.status %}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="bento__foot"><a class="link-quiet" href="{% url 'alteration-list' %}">See the whole queue →</a></p>
+    {% else %}
+    <div class="empty empty--inline">
+      <p class="empty__title">Nothing needs attention — the queue is clear</p>
+      <p class="empty__text">Flag a singer as needing alteration from the roster when a fitting changes.</p>
+      <p class="form-note">
+        <a class="link-quiet" href="{% url 'singer-list' %}">Open the roster</a> ·
+        <a class="link-quiet" href="{% url 'venue-list' %}">Venues and dress codes</a>
+      </p>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="bento__cell" aria-labelledby="stat-singers">
+    <h2 class="bento__label" id="stat-singers">Singers in the roster</h2>
+    <p class="bento__value">{{ singer_count }}</p>
+    <p class="bento__foot"><a class="link-quiet" href="{% url 'singer-list' %}">Open the roster →</a></p>
+  </section>
+
+  <section class="bento__cell" aria-labelledby="stat-unassigned">
+    <h2 class="bento__label" id="stat-unassigned">No robe size yet</h2>
+    <p class="bento__value">{{ unassigned_count }}</p>
+    <p class="bento__foot">
+      {% if unassigned_count %}<a class="link-quiet" href="{% url 'singer-list' %}">Assign sizes →</a>{% else %}Every singer has a size{% endif %}
+    </p>
+  </section>
+
+  <section class="bento__cell" aria-labelledby="stat-alterations">
+    <h2 class="bento__label" id="stat-alterations">Open alterations</h2>
+    <p class="bento__value">{{ open_alteration_count }}</p>
+    <p class="bento__foot">{{ queued_count }} queued · <a class="link-quiet" href="{% url 'alteration-list' %}">Queue →</a></p>
+  </section>
+
+  <section class="bento__cell" aria-labelledby="stat-venues">
+    <h2 class="bento__label" id="stat-venues">Concert venues</h2>
+    <p class="bento__value">{{ venue_count }}</p>
+    <p class="bento__foot"><a class="link-quiet" href="{% url 'venue-list' %}">Dress codes →</a></p>
+  </section>
+
+  <section class="bento__cell bento__cell--wide" aria-labelledby="awaiting-title">
+    <p class="bento__label">Waiting on a fitting</p>
+    <h2 class="section-title" id="awaiting-title">Singers still awaiting a robe size</h2>
+    {% if awaiting_size %}
+    <ul class="bento__list">
+      {% for singer in awaiting_size %}
+      <li>
+        <a class="bento__item" href="{% url 'singer-detail' singer.id %}">
+          <span class="bento__item-name">{{ singer.full_name }}</span>
+          <span class="bento__item-meta">{{ singer.get_voice_part_display }}</span>
+          <span class="chip chip--empty">Unassigned</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="bento__foot">Every singer has a robe size assigned — nothing is waiting on a fitting.</p>
+    {% endif %}
+  </section>
+
+  <section class="bento__cell bento__cell--wide bento__cell--accent" aria-labelledby="quick-title">
+    <p class="bento__label">Quick links</p>
+    <h2 class="section-title" id="quick-title">Where the work happens</h2>
+    <div class="quicklinks">
+      <a class="quicklink" href="{% url 'singer-list' %}">Roster <span class="quicklink__arrow">→</span></a>
+      <a class="quicklink" href="{% url 'alteration-list' %}">Alterations <span class="quicklink__arrow">→</span></a>
+      <a class="quicklink" href="{% url 'robe-list' %}">Robe sizes <span class="quicklink__arrow">→</span></a>
+      <a class="quicklink" href="{% url 'venue-list' %}">Venues <span class="quicklink__arrow">→</span></a>
+    </div>
+  </section>
+</div>
+{% endblock %}

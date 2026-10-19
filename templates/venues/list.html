@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Venues & dress codes · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <h1 class="page-title">Venues &amp; dress codes</h1>
+      <span class="page-meta">{{ venues|length }} venue{{ venues|length|pluralize }}</span>
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--primary" href="#add-venue">Add venue</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    {% if venues %}
+    <div class="card card--flush">
+      <div class="rows stagger">
+        {% for venue in venues %}
+        <div class="row row--link">
+          <a class="row__summary" href="{% url 'venue-detail' venue.id %}">
+            <span class="row__primary">{{ venue.name }}<span class="row__meta">{{ venue.address }}</span></span>
+            <span class="row__excerpt">{{ venue.dress_code_excerpt }}</span>
+            <span class="row__cta">Open dress code →</span>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty">
+      <p class="empty__title">No venues yet — add a venue to record its concert dress code</p>
+      <p class="empty__text">Each venue carries the exact dress code the choir wears there, so nobody guesses on concert day.</p>
+      <a class="btn btn--primary" href="#add-venue">Add venue</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="split__aside">
+    <div class="card" id="add-venue">
+      <div class="card__head">
+        <h2 class="section-title">Add venue</h2>
+      </div>
+      <form method="post" action="{% url 'venue-list' %}" class="form-stack">
+        {% csrf_token %}
+        <div class="field">
+          <label class="field__label" for="{{ form.name.id_for_label }}">Venue name</label>
+          {{ form.name }}
+          {% include "partials/_field_errors.html" with field=form.name %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.address.id_for_label }}">Address</label>
+          {{ form.address }}
+          {% include "partials/_field_errors.html" with field=form.address %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.dress_code.id_for_label }}">Dress code</label>
+          {{ form.dress_code }}
+          {% include "partials/_field_errors.html" with field=form.dress_code %}
+          <p class="field__hint">One line per rule — robe, gloves, shoes, anything the choir must remember.</p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.notes.id_for_label }}">Note <span class="field__hint">(optional)</span></label>
+          {{ form.notes }}
+          {% include "partials/_field_errors.html" with field=form.notes %}
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Add venue</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

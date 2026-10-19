@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ singer.full_name }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'singer-list' %}">← Roster</a>
+      <h1 class="page-title">{{ singer.full_name }}</h1>
+      <span class="chip">{{ singer.get_voice_part_display }}</span>
+      {% if singer.robe_size %}
+      <span class="chip chip--size">Size {{ singer.robe_size.code }}</span>
+      {% else %}
+      <span class="chip chip--empty">Unassigned</span>
+      {% endif %}
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--ghost" href="{% url 'alteration-list' %}">Alteration queue</a>
+      <a class="btn btn--danger" href="{% url 'singer-delete' singer.id %}">Delete singer</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <form method="post" action="{% url 'singer-detail' singer.id %}" class="card form-stack">
+    {% csrf_token %}
+    <div class="card__head">
+      <h2 class="section-title">Fitting details</h2>
+      <span class="card__sub">Changes are saved to the database immediately.</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label class="field__label" for="{{ form.full_name.id_for_label }}">Full name</label>
+        {{ form.full_name }}
+        {% include "partials/_field_errors.html" with field=form.full_name %}
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.voice_part.id_for_label }}">Voice part</label>
+        {{ form.voice_part }}
+        {% include "partials/_field_errors.html" with field=form.voice_part %}
+      </div>
+      <div class="field field--full">
+        <label class="field__label" for="{{ form.robe_size.id_for_label }}">Robe size</label>
+        {{ form.robe_size }}
+        {% include "partials/_field_errors.html" with field=form.robe_size %}
+        {% if singer.robe_size %}
+        <p class="field__hint">
+          Currently {{ singer.robe_size.code }} — chest {{ singer.robe_size.chest_range }} in, length {{ singer.robe_size.length_inches }} in.
+          Choose “Unassigned” to clear it.
+        </p>
+        {% else %}
+        <p class="field__hint">No robe size assigned yet — pick one from the catalog. Sizes live on the <a href="{% url 'robe-list' %}">robe size catalog</a>.</p>
+        {% endif %}
+      </div>
+      <div class="field field--full">
+        <label class="field__label" for="{{ form.notes.id_for_label }}">Notes <span class="field__hint">(optional)</span></label>
+        {{ form.notes }}
+        {% include "partials/_field_errors.html" with field=form.notes %}
+      </div>
+    </div>
+
+    <div class="form-stack">
+      <label class="check" for="{{ form.needs_alteration.id_for_label }}">
+        {{ form.needs_alteration }}
+        <span>Needs alteration — queue a ticket for the seamstress</span>
+      </label>
+      <div class="field">
+        <label class="field__label" for="{{ form.alteration_note.id_for_label }}">{{ form.alteration_note.label }}</label>
+        {{ form.alteration_note }}
+        {% include "partials/_field_errors.html" with field=form.alteration_note %}
+        <p class="field__hint">Only used when the checkbox is ticked; a queued ticket is created on save.</p>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary">Save fitting</button>
+      <a class="btn btn--ghost" href="{% url 'singer-list' %}">Back to roster</a>
+    </div>
+  </form>
+
+  <aside class="split__aside">
+    <section class="card" aria-labelledby="current-size">
+      <div class="card__head">
+        <h2 class="section-title" id="current-size">Current robe</h2>
+        <a class="link-quiet" href="{% url 'robe-list' %}">Catalog</a>
+      </div>
+      {% if singer.robe_size %}
+      <div class="size-hero">
+        <span class="size-hero__code">{{ singer.robe_size.code }}</span>
+        <span class="size-hero__meta">Chest {{ singer.robe_size.chest_range }} in · Length {{ singer.robe_size.length_inches }} in</span>
+      </div>
+      {% if singer.robe_size.notes %}<p class="card__sub">{{ singer.robe_size.notes }}</p>{% endif %}
+      {% else %}
+      <div class="empty empty--inline">
+        <p class="empty__title">No robe size assigned yet</p>
+        <p class="empty__text">Pick a size from the catalog on the left — the roster chip and dashboard count update as soon as you save.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card" aria-labelledby="alteration-history">
+      <div class="card__head">
+        <h2 class="section-title" id="alteration-history">Alteration history</h2>
+        <a class="link-quiet" href="{% url 'alteration-list' %}">Queue</a>
+      </div>
+      {% if alterations %}
+      <div class="timeline">
+        {% for ticket in alterations %}
+        <a class="timeline__item" href="{% url 'alteration-detail' ticket.id %}">
+          <span class="timeline__row">
+            {% include "partials/_status_badge.html" with status=ticket.status %}
+            <span class="timeline__meta">Requested {{ ticket.requested_at|date:"j M Y" }}</span>
+          </span>
+          {% if ticket.notes_excerpt %}<span class="timeline__note">{{ ticket.notes_excerpt }}</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty empty--inline">
+        <p class="empty__title">No alterations yet</p>
+        <p class="empty__text">Tick “Needs alteration” above to queue the first ticket for this singer.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card" aria-labelledby="singer-meta">
+      <div class="card__head"><h2 class="section-title" id="singer-meta">Record</h2></div>
+      <dl class="definition">
+        <dt>Voice part</dt>
+        <dd>{{ singer.get_voice_part_display }}</dd>
+        <dt>Added</dt>
+        <dd>{{ singer.created_at|date:"j M Y" }}</dd>
+        <dt>Account</dt>
+        <dd>{% if singer.user %}{{ singer.user.get_username }}{% else %}No singer account linked{% endif %}</dd>
+      </dl>
+      {% if singer.notes %}<p class="card__sub">{{ singer.notes }}</p>{% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

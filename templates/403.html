@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Not available · {{ product_name }}{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="err-title">
+    <p class="error-code">403 · Not available to this account</p>
+    <h1 class="error-title" id="err-title">That page is for the choir director</h1>
+    <p class="empty__text">{{ reason }}</p>
+    <div class="form-actions">
+      <a class="btn btn--primary" href="{{ back_url }}">{{ back_label }}</a>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--ghost">Sign out</button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

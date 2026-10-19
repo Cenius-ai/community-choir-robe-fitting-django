@@ -1,0 +1,5 @@
+{% comment %}Status badge for an alteration, plus an explicit "no ticket" variant.{% endcomment %}
+{% if status == "queued" %}<span class="badge badge--queued">Queued</span>
+{% elif status == "in_progress" %}<span class="badge badge--in_progress">In progress</span>
+{% elif status == "done" %}<span class="badge badge--done">Done</span>
+{% else %}<span class="badge badge--none">No ticket</span>{% endif %}

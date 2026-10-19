@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Singer roster · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <form method="get" action="{% url 'singer-list' %}" class="filterbar__heading" role="search">
+      <h1 class="page-title">Singer roster</h1>
+      <span class="page-meta">{{ total_singers }} singer{{ total_singers|pluralize }}</span>
+      <label class="visually-hidden" for="roster-search">Search singers by name</label>
+      <input id="roster-search" type="search" name="q" value="{{ query }}" placeholder="Search by name" autocomplete="off">
+      {% if voice %}<input type="hidden" name="voice" value="{{ voice }}">{% endif %}
+      <button type="submit" class="btn btn--ghost btn--sm">Search</button>
+    </form>
+    <div class="filterbar__actions">
+      <a class="btn btn--primary" href="#add-singer">Add singer</a>
+    </div>
+    <div class="tabs" role="group" aria-label="Filter by voice part">
+      <a class="tab" href="{% url 'singer-list' %}{% if query %}?q={{ query|urlencode }}{% endif %}"{% if not voice %} aria-current="page"{% endif %}>All <span class="tab__count">{{ total_singers }}</span></a>
+      {% for part in voice_filters %}
+      <a class="tab" href="{% url 'singer-list' %}?voice={{ part.value }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"{% if voice == part.value %} aria-current="page"{% endif %}>{{ part.label }} <span class="tab__count">{{ part.count }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    {% if singers %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Singer</th>
+            <th scope="col">Voice part</th>
+            <th scope="col">Robe size</th>
+            <th scope="col">Alteration</th>
+            <th scope="col"><span class="visually-hidden">Open</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for singer in singers %}
+          <tr>
+            <td><a class="row-link" href="{% url 'singer-detail' singer.id %}">{{ singer.full_name }}</a></td>
+            <td>{{ singer.get_voice_part_display }}</td>
+            <td>
+              {% if singer.robe_size %}
+              <span class="chip chip--size">{{ singer.robe_size.code }} · {{ singer.robe_size.chest_range }} in</span>
+              {% else %}
+              <span class="chip chip--empty">Unassigned</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if singer.open_alteration %}
+              {% include "partials/_status_badge.html" with status=singer.open_alteration.status %}
+              {% elif singer.latest_alteration %}
+              {% include "partials/_status_badge.html" with status="done" %}
+              {% else %}
+              {% include "partials/_status_badge.html" with status="" %}
+              {% endif %}
+            </td>
+            <td class="num"><a class="link-quiet" href="{% url 'singer-detail' singer.id %}">Open</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif filters_active %}
+    <div class="empty">
+      <p class="empty__title">No singers match that search — clear filters or add a singer</p>
+      <p class="empty__text">Nothing in the roster matches{% if query %} “{{ query }}”{% endif %}{% if voice %} in the {{ voice|capfirst }} section{% endif %}.</p>
+      <div class="form-actions">
+        <a class="btn btn--ghost" href="{% url 'singer-list' %}">Clear filters</a>
+        <a class="btn btn--primary" href="#add-singer">Add singer</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty">
+      <p class="empty__title">No singers on the roster yet</p>
+      <p class="empty__text">Add the first singer and their robe size will follow after the fitting.</p>
+      <a class="btn btn--primary" href="#add-singer">Add singer</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="split__aside">
+    <div class="card" id="add-singer">
+      <div class="card__head">
+        <h2 class="section-title">Add singer</h2>
+      </div>
+      <form method="post" action="{% url 'singer-list' %}" class="form-stack">
+        {% csrf_token %}
+        <div class="field">
+          <label class="field__label" for="{{ form.full_name.id_for_label }}">Full name</label>
+          {{ form.full_name }}
+          {% include "partials/_field_errors.html" with field=form.full_name %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.voice_part.id_for_label }}">Voice part</label>
+          {{ form.voice_part }}
+          {% include "partials/_field_errors.html" with field=form.voice_part %}
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ form.notes.id_for_label }}">Notes <span class="field__hint">(optional)</span></label>
+          {{ form.notes }}
+          {% include "partials/_field_errors.html" with field=form.notes %}
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Add singer</button>
+        </div>
+        <p class="form-note">New singers join the roster as <strong>Unassigned</strong> until you pick a robe size on their page.</p>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

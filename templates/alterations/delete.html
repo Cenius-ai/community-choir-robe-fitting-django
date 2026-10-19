@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Delete ticket · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'alteration-detail' ticket.id %}">← Alteration</a>
+      <h1 class="page-title">Delete ticket</h1>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="delete-ticket-title">
+    <p class="error-code">Confirm deletion</p>
+    <h2 class="error-title" id="delete-ticket-title">Delete the alteration ticket for {{ ticket.singer.full_name }}?</h2>
+    <p class="empty__text">The seamstress notes on this ticket will be deleted too. This cannot be undone.</p>
+    <form method="post" action="{% url 'alteration-delete' ticket.id %}" class="form-actions">
+      {% csrf_token %}
+      <input type="hidden" name="confirm" value="yes">
+      <button type="submit" class="btn btn--danger">Yes, delete ticket</button>
+      <a class="btn btn--ghost" href="{% url 'alteration-detail' ticket.id %}">Keep ticket</a>
+    </form>
+  </section>
+</div>
+{% endblock %}

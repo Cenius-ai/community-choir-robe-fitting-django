@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'venue-list' %}">← Venues</a>
+      <h1 class="page-title">{{ venue.name }}</h1>
+      <span class="page-meta">{{ venue.address }}</span>
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--danger" href="{% url 'venue-delete' venue.id %}">Delete venue</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    <section class="card" aria-labelledby="dress-code-title">
+      <div class="card__head">
+        <h2 class="section-title" id="dress-code-title">Concert dress code</h2>
+        <span class="card__sub">Worn by the whole choir at {{ venue.name }}</span>
+      </div>
+      <blockquote class="quote-block">{{ venue.dress_code }}</blockquote>
+      {% if venue.notes %}<p class="card__sub">{{ venue.notes }}</p>{% endif %}
+    </section>
+
+    <form method="post" action="{% url 'venue-detail' venue.id %}" class="card form-stack">
+      {% csrf_token %}
+      <div class="card__head">
+        <h2 class="section-title">Edit venue</h2>
+        <span class="card__sub">Saving updates the list excerpt too.</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.name.id_for_label }}">Venue name</label>
+        {{ form.name }}
+        {% include "partials/_field_errors.html" with field=form.name %}
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.address.id_for_label }}">Address</label>
+        {{ form.address }}
+        {% include "partials/_field_errors.html" with field=form.address %}
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.dress_code.id_for_label }}">Dress code</label>
+        {{ form.dress_code }}
+        {% include "partials/_field_errors.html" with field=form.dress_code %}
+        <p class="field__hint">One line per rule. A blank dress code is rejected.</p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.notes.id_for_label }}">Note <span class="field__hint">(optional)</span></label>
+        {{ form.notes }}
+        {% include "partials/_field_errors.html" with field=form.notes %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary">Save dress code</button>
+        <a class="btn btn--ghost" href="{% url 'venue-list' %}">Back to venues</a>
+      </div>
+    </form>
+  </div>
+
+  <aside class="split__aside">
+    <section class="card" aria-labelledby="venue-meta">
+      <div class="card__head"><h2 class="section-title" id="venue-meta">Venue</h2></div>
+      <dl class="definition">
+        <dt>Name</dt>
+        <dd>{{ venue.name }}</dd>
+        <dt>Address</dt>
+        <dd>{{ venue.address }}</dd>
+        <dt>Added</dt>
+        <dd>{{ venue.created_at|date:"j M Y" }}</dd>
+      </dl>
+      {% if venue.notes %}<p class="card__sub">{{ venue.notes }}</p>{% endif %}
+    </section>
+
+    <section class="card" aria-labelledby="venue-danger">
+      <div class="card__head"><h2 class="section-title" id="venue-danger">Remove venue</h2></div>
+      <p class="card__sub">Deleting a venue also deletes its dress code. The confirmation page asks once more.</p>
+      <div class="form-actions">
+        <a class="btn btn--danger" href="{% url 'venue-delete' venue.id %}">Delete venue</a>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

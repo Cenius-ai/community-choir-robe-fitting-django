@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Robe size catalog · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <h1 class="page-title">Robe size catalog</h1>
+      <span class="page-meta">{{ sizes|length }} size{{ sizes|length|pluralize }}</span>
+    </div>
+    <div class="filterbar__actions">
+      <a class="btn btn--primary" href="#add-size">Add size</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="split">
+  <div class="stack">
+    {% if sizes %}
+    <div class="card card--flush">
+      <div class="rows stagger">
+        {% for size in sizes %}
+        <details class="row"{% if edit_size_id == size.id %} open{% endif %}>
+          <summary class="row__summary">
+            <span class="row__primary">{{ size.code }}{% if size.notes %}<span class="row__meta">{{ size.notes }}</span>{% endif %}</span>
+            <span class="row__meta">Chest {{ size.chest_range }} in</span>
+            <span class="row__meta">Length {{ size.length_inches }} in</span>
+            <span class="row__meta num">{{ size.in_use }} singer{{ size.in_use|pluralize }}</span>
+            <span class="row__edit">Edit</span>
+          </summary>
+          <div class="row__panel">
+            <form method="post" action="{% url 'robe-update' size.id %}" class="form-stack">
+              {% csrf_token %}
+              <div class="form-grid">
+                {% if edit_size_id == size.id %}
+                <div class="field">
+                  <label class="field__label" for="{{ edit_form.code.id_for_label }}">Code</label>
+                  {{ edit_form.code }}
+                  {% include "partials/_field_errors.html" with field=edit_form.code %}
+                </div>
+                <div class="field">
+                  <label class="field__label" for="{{ edit_form.chest_range.id_for_label }}">Chest range (in)</label>
+                  {{ edit_form.chest_range }}
+                  {% include "partials/_field_errors.html" with field=edit_form.chest_range %}
+                </div>
+                <div class="field">
+                  <label class="field__label" for="{{ edit_form.length_inches.id_for_label }}">Length (in)</label>
+                  {{ edit_form.length_inches }}
+                  {% include "partials/_field_errors.html" with field=edit_form.length_inches %}
+                </div>
+                <div class="field">
+                  <label class="field__label" for="{{ edit_form.notes.id_for_label }}">Note</label>
+                  {{ edit_form.notes }}
+                  {% include "partials/_field_errors.html" with field=edit_form.notes %}
+                </div>
+                {% else %}
+                <div class="field">
+                  <label class="field__label" for="code-{{ size.id }}">Code</label>
+                  <input type="text" id="code-{{ size.id }}" name="code" value="{{ size.code }}" maxlength="12" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="chest-{{ size.id }}">Chest range (in)</label>
+                  <input type="text" id="chest-{{ size.id }}" name="chest_range" value="{{ size.chest_range }}" placeholder="e.g. 38-40" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="length-{{ size.id }}">Length (in)</label>
+                  <input type="number" id="length-{{ size.id }}" name="length_inches" value="{{ size.length_inches }}" min="24" max="90" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="notes-{{ size.id }}">Note</label>
+                  <input type="text" id="notes-{{ size.id }}" name="notes" value="{{ size.notes }}">
+                </div>
+                {% endif %}
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary btn--sm">Save size</button>
+                <a class="link-quiet" href="{% url 'robe-list' %}">Cancel</a>
+              </div>
+            </form>
+            <form method="post" action="{% url 'robe-delete' size.id %}" class="form-actions">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--danger btn--sm">Delete size</button>
+              <span class="form-note">
+                {% if size.in_use %}Blocked while it is assigned to {{ size.in_use }} singer{{ size.in_use|pluralize }}.{% else %}Not worn by anyone — safe to remove.{% endif %}
+              </span>
+            </form>
+          </div>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty">
+      <p class="empty__title">Add your first robe size — sizes you create here become assignable to singers</p>
+      <p class="empty__text">Each size carries a code, the chest range it fits and the garment length in inches.</p>
+      <a class="btn btn--primary" href="#add-size">Add robe size</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="split__aside">
+    <div class="card" id="add-size">
+      <div class="card__head">
+        <h2 class="section-title">Add robe size</h2>
+      </div>
+      <form method="post" action="{% url 'robe-list' %}" class="form-stack">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="field">
+            <label class="field__label" for="{{ form.code.id_for_label }}">Code</label>
+            {{ form.code }}
+            {% include "partials/_field_errors.html" with field=form.code %}
+          </div>
+          <div class="field">
+            <label class="field__label" for="{{ form.chest_range.id_for_label }}">Chest range (in)</label>
+            {{ form.chest_range }}
+            {% include "partials/_field_errors.html" with field=form.chest_range %}
+          </div>
+          <div class="field">
+            <label class="field__label" for="{{ form.length_inches.id_for_label }}">Length (in)</label>
+            {{ form.length_inches }}
+            {% include "partials/_field_errors.html" with field=form.length_inches %}
+          </div>
+          <div class="field">
+            <label class="field__label" for="{{ form.notes.id_for_label }}">Note <span class="field__hint">(optional)</span></label>
+            {{ form.notes }}
+            {% include "partials/_field_errors.html" with field=form.notes %}
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Add size</button>
+        </div>
+        <p class="form-note">Chest range like <strong>38-40</strong>, length in whole inches.</p>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

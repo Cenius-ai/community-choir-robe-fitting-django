@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Page not found · {{ product_name }}{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="err-title">
+    <p class="error-code">404 · Page not found</p>
+    <h1 class="error-title" id="err-title">We couldn't find that record</h1>
+    <p class="empty__text">It may have been deleted, or the link may be pointing at a singer, ticket or venue that no longer exists.</p>
+    <div class="form-actions">
+      <a class="btn btn--primary" href="{{ back_url }}">{{ back_label }}</a>
+      <a class="btn btn--ghost" href="{% url 'home' %}">Back to the start</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

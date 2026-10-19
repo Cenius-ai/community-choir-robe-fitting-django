@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Delete size {{ size.code }} · {{ product_name }}{% endblock %}
+
+{% block filterbar %}
+<div class="filterbar">
+  <div class="filterbar__inner">
+    <div class="filterbar__heading">
+      <a class="link-quiet" href="{% url 'robe-list' %}">← Robe size catalog</a>
+      <h1 class="page-title">Delete size {{ size.code }}</h1>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <section class="error-card" aria-labelledby="delete-size-title">
+    <p class="error-code">Confirm deletion</p>
+    <h2 class="error-title" id="delete-size-title">Remove size {{ size.code }} from the catalog?</h2>
+    <p class="empty__text">Chest {{ size.chest_range }} in, length {{ size.length_inches }} in. No singer wears this size, so it can be removed.</p>
+    <form method="post" action="{% url 'robe-delete' size.id %}" class="form-actions">
+      {% csrf_token %}
+      <input type="hidden" name="confirm" value="yes">
+      <button type="submit" class="btn btn--danger">Yes, delete size {{ size.code }}</button>
+      <a class="btn btn--ghost" href="{% url 'robe-list' %}">Keep size</a>
+    </form>
+  </section>
+</div>
+{% endblock %}

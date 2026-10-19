@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Sign in · {{ product_name }}{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block main_class %}auth-main{% endblock %}
+{% block filterbar %}{% endblock %}
+{% block messages %}{% endblock %}
+
+{% block content %}
+<section class="auth-card" aria-labelledby="auth-title">
+  <div class="auth-card__head">
+    <p class="eyebrow">Choir fittings</p>
+    <h1 class="auth-card__title" id="auth-title">Sign in</h1>
+    <p class="auth-card__lede">Robe sizes, the alteration queue and concert dress codes for one community choir.</p>
+  </div>
+
+  {% if signed_out %}
+  <p class="auth-notice">You have signed out. Sign in again to get back to the fittings.</p>
+  {% elif needs_sign_in %}
+  <p class="auth-notice">Please sign in to continue — that page is for choir accounts.</p>
+  {% endif %}
+
+  <form method="post" action="{% url 'login' %}" class="form-stack">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}
+    <p class="field__error" role="alert" id="login-error">{{ form.non_field_errors|join:" " }}</p>
+    {% endif %}
+
+    <div class="field">
+      <label class="field__label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+      {{ form.username }}
+      {% include "partials/_field_errors.html" with field=form.username %}
+    </div>
+
+    <div class="field">
+      <div class="field__row">
+        <label class="field__label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        <button type="button" class="btn btn--ghost btn--sm" data-toggle-password="#{{ form.password.id_for_label }}">Show password</button>
+      </div>
+      {{ form.password }}
+      {% include "partials/_field_errors.html" with field=form.password %}
+    </div>
+
+    <button type="submit" class="btn btn--primary btn--block">Sign in</button>
+  </form>
+
+  <div class="auth-divider">demo</div>
+
+  <div class="demo-hint">
+    <p class="demo-hint__creds">Demo: <code>cenius@cenius.ai</code> / <code>cenius</code></p>
+    <p class="form-note">Director account — the roster, alteration queue, robe sizes and venues.</p>
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="username" value="cenius">
+      <input type="hidden" name="password" value="cenius">
+      <button type="submit" class="btn btn--ghost btn--block">Sign in as the demo director</button>
+    </form>
+  </div>
+
+  <p class="auth-foot">Singer accounts sign in here too and land on their own robe page. Accounts are issued by the choir director.</p>
+</section>
+{% endblock %}
