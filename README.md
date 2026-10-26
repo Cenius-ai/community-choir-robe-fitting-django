@@ -25,7 +25,7 @@ _Local clone? See [Quick start](#quick-start) below. cenius.ai is the zero-setup
 
 ## Architecture
 
-The repository contains 70 files of Django source, organised under `choirfit/`, `singers/`, `static/`, `templates/`. One command (`./install.sh`) covers dependency setup and demo-data seeding. See [`INSTALL.md`](INSTALL.md) for complete setup instructions.
+The repository contains 57 files of Django source, organised under `choirfit/`, `singers/`, `static/`, `templates/`. One command (`./install.sh`) covers dependency setup and demo-data seeding. See [`INSTALL.md`](INSTALL.md) for complete setup instructions.
 
 ## Features
 
